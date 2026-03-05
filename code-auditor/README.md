@@ -297,10 +297,10 @@ AI 审计最大的风险是"编造漏洞"。Code Auditor 内置双重防护：
 ## 项目文件结构
 
 ```
-code-auditor/                            32 个文件，结构化组织
-├── SKILL.md              (201行)   主 SOP — 执行控制器 + EALOC + 双轨框架
+code-auditor/                            33 个文件，结构化组织
+├── SKILL.md              (246行)   主 SOP — 执行控制器 + EALOC + 双轨框架
 ├── README.md                        项目说明
-├── core/                (1,151行)   核心方法论
+├── core/                (1,416行)   核心方法论
 │   ├── taint_analysis.md              污点追踪 + LSP + Slot 类型
 │   ├── security_controls.md           控制建模方法论（轨道 A）
 │   ├── data_flow_methodology.md       数据流分析（轨道 B）
@@ -319,8 +319,8 @@ code-auditor/                            32 个文件，结构化组织
 ├── examples/
 │   └── audit_demo.md                  soc-agent 联动审计完整记录
 └── scripts/
-    ├── scan_sinks.py      (540行)   零依赖 Sink 粗筛 + EALOC 分层
-    └── test_scan_sinks.py (280行)   39 个单元测试
+    ├── scan_sinks.py      (541行)   零依赖 Sink 粗筛 + EALOC 分层
+    └── test_scan_sinks.py (316行)   39 个单元测试
 ```
 
 ---
@@ -330,7 +330,7 @@ code-auditor/                            32 个文件，结构化组织
 > **"不是教 AI 什么是漏洞，而是教它先看什么、后查什么、查到什么程度。"**
 
 1. **SOP 驱动而非规则驱动** — AI 已经"知道"什么是 SQL 注入，它缺的是系统化的审计流程
-2. **结构化而非堆砌** — 32 文件按 6 层组织（方法论/语言/安全域/检查/工具/示例）
+2. **结构化而非堆砌** — 33 文件按 6 层组织（方法论/语言/安全域/检查/工具/示例）
 3. **权重而非平均** — EALOC 让 AI 把 80% 精力花在入口层和业务层
 4. **宁漏勿误** — 反幻觉机制确保每个发现都基于实际代码
 5. **渐进式加载** — 只在需要时读取对应语言模块，节省上下文窗口

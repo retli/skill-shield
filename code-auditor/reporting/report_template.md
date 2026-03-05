@@ -86,8 +86,14 @@
 
 **PoC（概念验证）**
 
-```
-攻击 payload 或复现步骤
+> **注意**: 必须遵循 `core/poc_generation.md` 规范，使用完整的 HTTP 请求数据包格式。
+
+```http
+POST /api/vuln HTTP/1.1
+Host: <target-host>
+Content-Type: application/x-www-form-urlencoded
+
+{完整的 HTTP 攻击 payload}
 ```
 
 **修复建议**

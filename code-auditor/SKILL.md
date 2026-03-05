@@ -39,13 +39,35 @@ tools:
 | "深度审计" "deep" "全面审计" | **deep** |
 | 无法判定 | **问用户，不得假设** |
 
-→ 输出: `[MODE] {standard|deep}`
+**必须在对话/思考流中明确打印以下内容后才能进入 S2**:
+
+```text
+[MODE] {standard|deep}
+理由: {判定依据}
+```
+*(注意：严格遵守，不可省略此步骤的显式声明)*
 
 ### S2: 项目画像 + EALOC
 
 执行攻击面测绘和 EALOC 分层。
 
-→ 输出: `[RECON]` 技术栈+入口点 + `[EALOC]` 三层统计
+**必须输出以下所有条目**（留空需标注"未识别"）:
+
+```
+[RECON]
+  项目名: ___
+  技术栈: ___ (框架/ORM/模板引擎)
+  入口点: 必须详细列出所有 Controller/Router 文件的具体路径或路由列表，禁止只填数字。
+  鉴权机制: ___ (Spring Security/JWT/Session/无)
+  CORS 配置: ___ (白名单/通配符/无)
+  公开端点(无鉴权): 明确列出免鉴权的 API 路径列表。
+
+[EALOC]
+  Tier1: ___ files, ___ LOC
+  Tier2: ___ files, ___ LOC
+  Tier3: ___ files, ___ LOC
+  EALOC = ___
+```
 
 #### EALOC 层级映射
 
@@ -67,11 +89,34 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 
 → 输出: `[PLAN]` 审计维度 + 重点文件
 
-**⚠️ STOP — 等待用户确认后才进入 S5。**
+> ⛔ **STOP — 强制物理停止点 (CRITICAL)**
+>
+> 输出 PLAN 后，**绝对禁止**立刻连贯进入 S5 深度代码阅读！
+> 你必须通过 `notify_user` 工具（将 BlockedOnUser 设为 true）或其他同等能中断执行流的工具，向用户展示计划，并**强制等待用户的明确审批**。
+>
+> 以下情况也**不得跳过**此停止点：
+> - 用户在初始请求中说了"完整审计"、"输出完整报告"或"不用确认直接做"
+>
+> **这是一个框架级防爆冲机制，如果不等待直接进行后续审计，视为严重违规！**
 
 ### S5: 深度审计
 
-用户确认后执行。**必须先加载核心方法论和对应语言模块。**
+用户确认后执行。
+
+**执行过程强制声明**:
+进入 S5 时，你必须在回答中显式打印：
+1. `【已加载语言模块】: 正在应用 languages/{lang}.md`
+2. `【执行轨道A】: 进行控制建模...` 或 `【执行轨道B】: 进行数据流分析...`
+
+> **S5 前置条件 — 未完成以下 Read 操作前不得开始审计：**
+>
+> 1. **Read** `languages/{lang}.md` （S2 识别出的主要语言，最多 2 个）
+> 2. **Read** `core/security_controls.md` （轨道 A 方法论）
+> 3. **Read** `core/taint_analysis.md` （轨道 B 方法论）
+> 4. **Read** `core/anti_hallucination.md` （反幻觉规则）
+> 5. **Read** `core/poc_generation.md` （PoC 模板，发现漏洞时使用）
+>
+> 如因上下文长度限制无法全部加载，至少加载第 1 项（语言模块）和第 4 项。
 
 **轨道 A — 控制建模法 (50%)**:
 > 详见 `core/security_controls.md`
@@ -89,33 +134,41 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 
 **补充 Skills 联动**（若已安装）：
 
-> 以下为**条件触发**，仅在发现对应漏洞时读取，不要无差别加载。
+> 以下为**条件触发的强制动作**。发现对应漏洞时**必须执行 Read**，不可跳过或假装已读。
 
-**wooyun-legacy — 按发现类型查阅案例**:
+**wooyun-legacy — 发现漏洞后必须 Read 对应案例文件**:
 
-| 发现的漏洞类型 | 读取文件 | 用途 |
+| 发现的漏洞类型 | **必须 Read** 的文件 | 在报告中必须引用 |
 |--------------|---------|------|
-| SQL 注入 | `wooyun-legacy/categories/sql-injection.md` | 确认绕过方式、二次注入模式 |
-| XSS | `wooyun-legacy/categories/xss.md` | 确认存储型/DOM型利用链 |
-| 命令执行/RCE | `wooyun-legacy/categories/command-execution.md` + `rce.md` | 确认利用可行性 |
-| 文件上传/路径遍历 | `wooyun-legacy/categories/file-upload.md` + `file-traversal.md` | 绕过方式参考 |
-| SSRF | `wooyun-legacy/categories/ssrf.md` | 协议绕过、内网探测 |
-| XXE | `wooyun-legacy/categories/xxe.md` | 确认 OOB 利用 |
-| 未授权访问/认证缺失 | `wooyun-legacy/categories/unauthorized-access.md` | 真实未授权案例 |
-| 逻辑漏洞/IDOR | `wooyun-legacy/categories/logic-flaws.md` | 业务逻辑绕过模式 |
+| SQL 注入 | `wooyun-legacy/categories/sql-injection.md` | 至少 1 个案例编号 |
+| XSS | `wooyun-legacy/categories/xss.md` | 至少 1 个案例编号 |
+| 命令执行/RCE | `wooyun-legacy/categories/command-execution.md` 或 `rce.md` | 至少 1 个案例编号 |
+| 文件上传/路径遍历 | `wooyun-legacy/categories/file-upload.md` 或 `file-traversal.md` | 至少 1 个案例编号 |
+| SSRF | `wooyun-legacy/categories/ssrf.md` | 至少 1 个案例编号 |
+| XXE | `wooyun-legacy/categories/xxe.md` | 至少 1 个案例编号 |
+| 未授权访问 | `wooyun-legacy/categories/unauthorized-access.md` | 至少 1 个案例编号 |
+| 逻辑漏洞/IDOR | `wooyun-legacy/categories/logic-flaws.md` | 至少 1 个案例编号 |
 
-⚠️ **不要查阅**：未发现对应漏洞时不读取案例文件。单个审计最多查阅 2-3 个分类。
+**约束规则**：
+- 未发现对应漏洞时**不得读取**。单个审计最多查阅 **2-3 个分类**
+- ⛔ **禁止虚报联动 (反幻觉核心)**：你必须在工具调用记录中真实执行了 `view_file` 或读取命令去读取 `~/.agents/skills/wooyun-legacy/...` 中的具体文件。如果工具调用历史中没有真实读取记录就在报告里声称参考了，这是极其严重的幻觉 (Hallucination) 违规！
 
-**xianzhi-research — 思维卡住时调用**:
+**xianzhi-research — 思维卡住时必须 Read 对应文件**:
 
-仅在以下场景读取 `xianzhi-research/references/` 对应文件：
-- 轨道 B **Sink→Source 追踪中断**（净化函数不确定）→ 读 `web-injection.md`（边界探索方法）
-- 轨道 A **控制建模后无法确认漏洞影响** → 读 `privilege-bypass.md`（提权/绕过思路）
-- deep 模式下需要 **跨域攻击链推导** → 读 `case-index.md`（CVE 组合利用参考）
+| 触发场景 | **必须 Read** 的文件 |
+|---------|------|
+| 轨道 B Sink→Source 追踪中断 | `xianzhi-research/references/web-injection.md` |
+| 轨道 A 控制建模后无法确认漏洞影响 | `xianzhi-research/references/privilege-bypass.md` |
+| deep 模式需要跨域攻击链推导 | `xianzhi-research/references/case-index.md` |
+
+⛔ **同样禁止虚报**：必须真实调用工具读取了 `xianzhi-research` 目录下的文件，否则绝对禁止在报告中声明"参考了 xianzhi 方法论"。
 
 ### S6: 报告输出
 
-验证覆盖率后按 `reporting/report_template.md` 输出。
+验证覆盖率后按 `reporting/report_template.md` 输出综合审计报告。
+
+🛡️ **强制规则 (PoC 生成)**:
+报告中的 PoC 小节**必须**遵循 `core/poc_generation.md`，使用 ` ```http ` 完整数据包格式，禁止使用普通文本或代码段来描述 PoC 步骤。
 
 | 前置条件 | standard | deep |
 |---------|----------|------|
