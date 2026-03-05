@@ -1,0 +1,36 @@
+{
+    "patterns": [
+        {
+            "name": "sensitive_file_access",
+            "pattern": "(\\.(env|ssh|aws|kube)|/etc/(passwd|shadow)|credentials|tokens?|api_?key|private_?key)",
+            "description": "访问敏感文件、存储库或凭据"
+        },
+        {
+            "name": "npm_install_unknown",
+            "pattern": "npm\\s+install\\s+(?!-)[^\\s]+",
+            "description": "安装 npm 包",
+            "check_allowlist": "npm_packages"
+        },
+        {
+            "name": "pip_install_unknown",
+            "pattern": "pip3?\\s+install\\s+(?!-)[^\\s]+",
+            "description": "安装 pip 包",
+            "check_allowlist": "pip_packages"
+        },
+        {
+            "name": "chmod_execute",
+            "pattern": "chmod\\s+\\+x.*&&.*\\./",
+            "description": "为脚本添加执行权限并运行"
+        },
+        {
+            "name": "curl_output_execute",
+            "pattern": "curl.*-o\\s+\\S+.*&&.*\\./",
+            "description": "下载文件并直接执行"
+        },
+        {
+            "name": "exec_downloaded",
+            "pattern": "(wget|curl).*&&.*(chmod|\\./)",
+            "description": "下载并执行文件"
+        }
+    ]
+}

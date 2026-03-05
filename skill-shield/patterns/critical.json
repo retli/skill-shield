@@ -1,0 +1,39 @@
+{
+  "patterns": [
+    {
+      "name": "curl_pipe_bash",
+      "pattern": "curl\\s+[^|]*\\|\\s*(ba)?sh",
+      "description": "直接执行远程脚本，未经验证"
+    },
+    {
+      "name": "wget_pipe_bash",
+      "pattern": "wget\\s+[^|]*\\|\\s*(ba)?sh",
+      "description": "直接执行远程脚本，未经验证"
+    },
+    {
+      "name": "curl_pipe_python",
+      "pattern": "curl\\s+[^|]*\\|\\s*python",
+      "description": "直接执行远程 Python 代码"
+    },
+    {
+      "name": "base64_decode_exec",
+      "pattern": "(base64\\s+-d|base64\\s+--decode).*\\|\\s*(ba)?sh",
+      "description": "解码并执行混淆代码"
+    },
+    {
+      "name": "eval_base64",
+      "pattern": "eval.*base64",
+      "description": "执行 Base64 编码的代码"
+    },
+    {
+      "name": "exfiltration_site",
+      "pattern": "(webhook\\.site|pastebin\\.com|ngrok\\.io|requestbin\\.net|discordapp\\.com/api/webhooks)",
+      "description": "常见的数据外泄/隧道服务"
+    },
+    {
+      "name": "xattr_remove_quarantine",
+      "pattern": "xattr\\s+-d\\s+com\\.apple\\.quarantine",
+      "description": "移除 macOS Gatekeeper 保护"
+    }
+  ]
+}

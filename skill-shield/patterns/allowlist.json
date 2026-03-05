@@ -1,0 +1,33 @@
+{
+    "urls": [
+        "github\\.com",
+        "githubusercontent\\.com",
+        "npmjs\\.com",
+        "pypi\\.org",
+        "python\\.org",
+        "openai\\.com",
+        "anthropic\\.com",
+        "google\\.com",
+        "microsoft\\.com",
+        "clawhub\\.ai",
+        "openclaw\\.io"
+    ],
+    "npm_packages": [
+        "axios",
+        "lodash",
+        "react",
+        "express",
+        "dotenv",
+        "mocha",
+        "jest"
+    ],
+    "pip_packages": [
+        "requests",
+        "numpy",
+        "pandas",
+        "flask",
+        "django",
+        "pytest",
+        "python-dotenv"
+    ]
+}

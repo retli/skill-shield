@@ -1,0 +1,20 @@
+{
+    "patterns": [
+        {
+            "name": "sudo_usage",
+            "pattern": "sudo\\s+",
+            "description": "需要提升的管理员权限"
+        },
+        {
+            "name": "network_post",
+            "pattern": "(curl\\s+-X\\s*POST|requests\\.post|axios\\.post|fetch.*method.*POST)",
+            "description": "向外部发送 POST 请求（可能发送数据）"
+        },
+        {
+            "name": "unknown_url",
+            "pattern": "https?://[^\\s\\)\\]\\\"\\'\\'\\>]+",
+            "description": "外部 URL 地址",
+            "check_allowlist": "urls"
+        }
+    ]
+}

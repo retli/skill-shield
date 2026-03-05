@@ -1,0 +1,35 @@
+{
+    "name": "skill-shield",
+    "version": "2.0.0",
+    "description": "Universal skill security scanner and auditor for all AI agent platforms",
+    "author": "zhangchengli",
+    "license": "MIT",
+    "category": "security",
+    "tags": [
+        "security",
+        "audit",
+        "scanner",
+        "supply-chain",
+        "malware-detection"
+    ],
+    "requires": {
+        "bins": [
+            "python3"
+        ]
+    },
+    "platforms": [
+        "macos",
+        "linux",
+        "windows"
+    ],
+    "compatible_agents": [
+        "gemini-code-assist",
+        "claude-code",
+        "github-copilot",
+        "cursor",
+        "windsurf",
+        "continue",
+        "aider",
+        "openclaw"
+    ]
+}
