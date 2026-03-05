@@ -31,7 +31,16 @@ SKIP_DIRS = {
     ".tox", ".mypy_cache", ".pytest_cache", "dist", "build", "target",
     "bin", "obj", ".next", ".nuxt", ".svelte-kit", "vendor", "packages",
     ".idea", ".vscode", ".gradle", ".mvn",
+    # Third-party / bundled libraries
+    "bower_components", "jspm_packages", "lib", "libs", "third-party",
+    "static/lib", "static/js", "assets/lib",
 }
+
+# Skip minified/bundled files (high false-positive rate)
+SKIP_FILE_SUFFIXES = {".min.js", ".min.css", ".bundle.js", ".chunk.js"}
+SKIP_FILE_PATTERNS = {"jquery", "bootstrap", "echarts", "layui", "ueditor",
+                      "wangEditor", "codemirror", "highcharts", "lodash",
+                      "moment", "vue.js", "react.", "angular."}
 
 # Language detection by file extension
 LANG_EXTENSIONS: Dict[str, List[str]] = {
@@ -205,7 +214,7 @@ LANG_SINKS: Dict[str, List[SinkPattern]] = {
     "javascript": [
         SinkPattern("eval", r"""\beval\s*\(""", Severity.CRITICAL, "eval() code execution"),
         SinkPattern("child_process", r"""child_process\.(?:exec|execSync|spawn)\s*\(""", Severity.CRITICAL, "child_process command execution"),
-        SinkPattern("function_constructor", r"""\bFunction\s*\(""", Severity.HIGH, "Function() constructor execution"),
+        SinkPattern("function_constructor", r"""\bnew\s+Function\s*\(""", Severity.HIGH, "new Function() constructor execution"),
         SinkPattern("prototype_pollution", r"""__proto__|Object\.assign\s*\([^,]*,\s*(?:req|user|input|body)""", Severity.HIGH, "Potential prototype pollution"),
         SinkPattern("xss_innerhtml", r"""\.innerHTML\s*=|dangerouslySetInnerHTML""", Severity.HIGH, "Unescaped HTML assignment (XSS)"),
         SinkPattern("sql_template", r"""(?:query|execute)\s*\(.*(?:\$\{|` ?\+)""", Severity.CRITICAL, "SQL template literal injection"),
@@ -268,6 +277,14 @@ def should_scan(file_path: Path) -> bool:
     """Check if file should be scanned."""
     if file_path.suffix.lower() not in EXT_TO_LANG:
         return False
+    # Skip minified/bundled files
+    name_lower = file_path.name.lower()
+    for suffix in SKIP_FILE_SUFFIXES:
+        if name_lower.endswith(suffix):
+            return False
+    for pattern in SKIP_FILE_PATTERNS:
+        if pattern in name_lower:
+            return False
     try:
         if file_path.stat().st_size > MAX_FILE_SIZE:
             return False
