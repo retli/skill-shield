@@ -9,7 +9,7 @@ EALOC tier (entry/business/model layer).
 Supports: Java, Python, Go, PHP, JavaScript/Node.js, C#, C/C++, Ruby, Rust
 
 Usage:
-    python3 scan_sinks.py <target_directory_or_file> [--json]
+    python3 scan_sinks.py <target_directory_or_file> [--json] [--coverage]
 """
 
 import sys
@@ -336,7 +336,8 @@ def scan_file(file_path: Path, language: str, tier: Tier) -> List[Finding]:
     return findings
 
 
-def scan_directory(target: Path) -> Tuple[List[Finding], Dict]:
+def scan_directory(target: Path) -> Tuple[List[Finding], Dict, List[Path]]:
+    scanned_files = []
     """Scan entire directory tree."""
     findings: List[Finding] = []
     stats = {
@@ -364,6 +365,7 @@ def scan_directory(target: Path) -> Tuple[List[Finding], Dict]:
         except (PermissionError, OSError):
             loc = 0
 
+        scanned_files.append(file_path)
         stats["files_scanned"] += 1
         stats["languages"][language] += 1
         stats["tiers"][tier]["files"] += 1
@@ -372,7 +374,7 @@ def scan_directory(target: Path) -> Tuple[List[Finding], Dict]:
         file_findings = scan_file(file_path, language, tier)
         findings.extend(file_findings)
 
-    return findings, stats
+    return findings, stats, scanned_files
 
 
 def format_report(findings: List[Finding], stats: Dict, target: str) -> str:
@@ -449,6 +451,20 @@ def format_report(findings: List[Finding], stats: Dict, target: str) -> str:
     return "\n".join(lines)
 
 
+
+def format_coverage(scanned_files: List[Path], target: Path) -> str:
+    """Generate formatted markdown coverage checklist."""
+    lines = []
+    lines.append("### [COVERAGE_MATRIX_TODO]")
+    lines.append("| 行号 | 文件路径 | Tier | Agent 审核状态 | 发现问题数 |")
+    lines.append("|---|---------|------|------|-------|")
+    for idx, fp in enumerate(sorted(scanned_files), start=1):
+        rel_path = os.path.relpath(fp, target)
+        lang = EXT_TO_LANG.get(fp.suffix.lower(), "unknown")
+        tier = classify_tier(fp, lang).value.split("-")[0]
+        lines.append(f"| {idx} | `{rel_path}` | {tier} | [ ] 待审阅 | 0 |")
+    return "\n".join(lines)
+
 # ─── Single File Scan ────────────────────────────────────────────
 
 def scan_single_file(file_path: Path):
@@ -462,7 +478,7 @@ def scan_single_file(file_path: Path):
 
     language = EXT_TO_LANG.get(file_path.suffix.lower())
     if not language:
-        return findings, stats
+        return findings, stats, scanned_files
 
     tier = classify_tier(file_path, language)
     try:
@@ -476,7 +492,7 @@ def scan_single_file(file_path: Path):
     stats["tiers"][tier]["loc"] = loc
 
     findings = scan_file(file_path, language, tier)
-    return findings, stats
+    return findings, stats, [file_path], scanned_files
 
 
 # ─── Main ───────────────────────────────────────────────────────
@@ -487,6 +503,7 @@ def main():
         print("Arguments:")
         print("  <target_directory_or_file>  Path to the project or file to scan")
         print("  --json                      Output in JSON format (optional)")
+        print("  --coverage                  Output markdown coverage matrix (optional)")
         sys.exit(0)
 
     target = Path(sys.argv[1]).resolve()
@@ -495,11 +512,16 @@ def main():
         sys.exit(1)
 
     use_json = "--json" in sys.argv
+    use_coverage = "--coverage" in sys.argv
 
     if target.is_file():
-        findings, stats = scan_single_file(target)
+        findings, stats, scanned_files = scan_single_file(target)
     else:
-        findings, stats = scan_directory(target)
+        findings, stats, scanned_files = scan_directory(target)
+
+    if use_coverage:
+        print(format_coverage(scanned_files, target))
+        sys.exit(0)
 
     if use_json:
         import json

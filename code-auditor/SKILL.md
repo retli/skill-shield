@@ -80,10 +80,11 @@ tools:
 ### S3: Sink 粗筛
 
 ```bash
-python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
+python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT" --coverage
 ```
 
 → 输出: `[SCAN]` Sink 数量 + EALOC 分布 + Top 高危文件
+→ 核心物料: 获取到随附输出的 **[COVERAGE_MATRIX_TODO]** 表格，将其初始化保存至上下文中，并在 S5 阶段持续维护。
 
 ### S4: 执行计划 → STOP
 
@@ -107,6 +108,7 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 进入 S5 时，你必须在回答中显式打印：
 1. `【已加载语言模块】: 正在应用 languages/{lang}.md`
 2. `【执行轨道A】: 进行控制建模...` 或 `【执行轨道B】: 进行数据流分析...`
+3. `【进度矩阵初始化】: 已载入 COVERAGE_MATRIX_TODO 准备跟踪...`
 
 > **S5 前置条件 — 未完成以下 Read 操作前不得开始审计：**
 >
@@ -115,8 +117,9 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 > 3. **Read** `core/taint_analysis.md` （轨道 B 方法论）
 > 4. **Read** `core/anti_hallucination.md` （反幻觉规则）
 > 5. **Read** `core/poc_generation.md` （PoC 模板，发现漏洞时使用）
+> 6. **Read** `checklists/coverage_tracker.md` （覆盖率门禁跟踪表）
 >
-> 如因上下文长度限制无法全部加载，至少加载第 1 项（语言模块）和第 4 项。
+> 如因上下文长度限制无法全部加载，至少加载第 1 项（语言模块）和第 4、6 项。
 
 **轨道 A — 控制建模法 (50%)**:
 > 详见 `core/security_controls.md`
@@ -131,6 +134,10 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 - Sink 排序(EALOC) → 反向追踪 → 净化检查
 
 **补充 (10%)**: 配置审计 + 依赖审计
+
+🛡️ **覆盖率门禁机制 (S5 核心约束)**:
+每次你在 S5 阶段完成 5-10 个文件的审查，或者在阶段性汇报时，**必须显式输出**更新后的 `[COVERAGE_MATRIX_TODO]` 表格（将已读文件标记为 `[x]`）。
+**⛔ 绝对禁止** 在该表格未达成 100% `[x]` 全覆盖前进入 S6 报告环节！漏审文件必须触发强制补扫。
 
 **补充 Skills 联动**（若已安装）：
 
@@ -185,7 +192,8 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 ```
 ✗ 不猜测文件路径  ✗ 不编造代码  ✗ 不报告未读取文件的漏洞
 ✓ Read 验证存在   ✓ 引用实际代码  ✓ 匹配项目技术栈
-核心: 宁漏勿误
+✓ 严格区分状态：**CONFIRMED**(条件完全满足) vs **HYPOTHESIS**(有断层/不确定)
+核心: 宁可漏报，不可误报
 ```
 
 ## Anti-Confirmation-Bias Rules
@@ -209,6 +217,7 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 | `core/data_flow_methodology.md` | 数据流分析 | 轨道 B 开始前 |
 | `core/anti_hallucination.md` | 反幻觉详细规则 | S5 开始前 |
 | `core/poc_generation.md` | PoC 生成 | 发现漏洞后 |
+| `security/deserialization_conditions.md` | 漏洞精细化条件判定表 | 发现模板/反序列化 Sink 时**必读** |
 | `core/external_tools_guide.md` | 外部工具 | 需要工具辅助时 |
 
 ### 语言模块（按 S2 技术栈加载）
@@ -243,7 +252,9 @@ python3 "$SKILL_DIR/scripts/scan_sinks.py" "$PROJECT_ROOT"
 | 文件 | 用途 | 何时加载 |
 |------|------|---------|
 | `checklists/coverage_matrix.md` | 覆盖自检 | S6 前 |
+| `checklists/coverage_tracker.md` | 文件级门禁 | S5 前必读 |
 | `checklists/universal_checklist.md` | 通用检查清单 | S5 补充 |
+| `core/dktss_scoring_system.md` | 漏洞量化评分推演系统 | S6 整理前**必读** |
 | `reporting/report_template.md` | 报告模板 | S6 |
 
 ### 推荐补充 Skills（可选，独立安装）
